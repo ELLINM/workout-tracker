@@ -1,0 +1,204 @@
+/* src/App.css (Updated with form styles) */
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.app-container {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+h1 {
+  color: #007bff;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  color: #007bff;
+  margin-top: 2.5rem; /* Add some space above the form and list heading */
+  margin-bottom: 1.5rem;
+}
+
+.workout-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.workout-item {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.workout-item h3 {
+  /* Changed from h2 to h3 for hierarchy */
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.workout-item p {
+  margin: 0.25rem 0;
+  color: #555;
+}
+
+.sets-container {
+  margin-top: 1rem;
+  border-top: 1px dashed #eee;
+  padding-top: 1rem;
+}
+
+.sets-container h4 {
+  /* Changed from h3 to h4 for hierarchy */
+  color: #007bff;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.set-item {
+  background-color: #e9f5ff;
+  border-left: 3px solid #007bff;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+}
+
+/* --- WorkoutForm Styles --- */
+.workout-form-container {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 3rem;
+}
+
+.workout-form-container h2 {
+  color: #28a745; /* Green for new workout form */
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.form-group label,
+.set-input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.form-group input[type="text"],
+.set-input-group input[type="number"] {
+  width: calc(100% - 20px); /* Adjust for padding */
+  padding: 10px;
+  margin-bottom: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.set-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.8rem;
+}
+
+.set-input-group input {
+  flex: 1; /* Distribute space evenly */
+}
+
+.set-input-group .remove-set-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.set-input-group .remove-set-btn:hover {
+  background-color: #c82333;
+}
+
+.add-set-btn,
+.submit-workout-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  transition: background-color 0.2s ease;
+  width: auto; /* Adjust width */
+}
+
+.add-set-btn {
+  background-color: #17a2b8; /* A bit different color for add set */
+  margin-right: 10px;
+}
+
+.add-set-btn:hover {
+  background-color: #138496;
+}
+
+.submit-workout-btn {
+  background-color: #007bff;
+}
+
+.submit-workout-btn:hover {
+  background-color: #0056b3;
+}
+
+.form-message {
+  margin-top: 1rem;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.form-message.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.form-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.divider {
+  border: 0;
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0)
+  );
+  margin: 3rem 0;
+}
