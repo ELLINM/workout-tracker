@@ -202,3 +202,70 @@ h2 {
   );
   margin: 3rem 0;
 }
+
+.delete-btn {
+  background-color: #dc3545; /* Red color for delete */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-top: 10px; /* Space from other content */
+  transition: background-color 0.2s ease;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+.edit-btn {
+  background-color: #007bff; /* Blue color for edit */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-top: 10px;
+  margin-right: 10px; /* Space between edit and delete buttons */
+  transition: background-color 0.2s ease;
+}
+
+.edit-btn:hover {
+  background-color: #0056b3;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-top: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+/* Add style for cancel button if desired */
+.cancel-edit-btn {
+  background-color: #6c757d; /* Gray color for cancel */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-top: 10px;
+  margin-left: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.cancel-edit-btn:hover {
+  background-color: #5a6268;
+}

@@ -1,31 +1,54 @@
 // src/WorkoutForm.jsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Add useEffect
 import axios from "axios";
 
-function WorkoutForm({ onNewWorkout }) {
-  // onNewWorkout prop to notify parent of new record
+// Add editingWorkout, onWorkoutUpdated, onCancelEdit to props
+function WorkoutForm({
+  onNewWorkout,
+  editingWorkout,
+  onWorkoutUpdated,
+  onCancelEdit,
+}) {
   const [exerciseName, setExerciseName] = useState("");
-  // sets is an array of objects, each representing a set
   const [sets, setSets] = useState([
     { setNumber: 1, repetitions: "", weight: "" },
   ]);
-  const [message, setMessage] = useState(""); // To display success or error messages
+  const [message, setMessage] = useState("");
 
-  // Handle changes in exercise name input
+  // --- Start: useEffect to populate form when editingWorkout changes ---
+  useEffect(() => {
+    if (editingWorkout) {
+      setExerciseName(editingWorkout.exerciseName);
+      // Ensure sets are correctly formatted for state
+      setSets(
+        editingWorkout.sets.map((set) => ({
+          setNumber: set.setNumber,
+          repetitions: set.repetitions,
+          weight: set.weight,
+        }))
+      );
+      setMessage(""); // Clear any previous messages
+    } else {
+      // Reset form when not editing
+      setExerciseName("");
+      setSets([{ setNumber: 1, repetitions: "", weight: "" }]);
+      setMessage("");
+    }
+  }, [editingWorkout]); // Re-run effect when editingWorkout changes
+  // --- End: useEffect to populate form when editingWorkout changes ---
+
   const handleExerciseNameChange = (e) => {
     setExerciseName(e.target.value);
   };
 
-  // Handle changes in individual set inputs
   const handleSetChange = (index, e) => {
     const { name, value } = e.target;
     const newSets = [...sets];
-    newSets[index][name] = Number(value); // Convert to number
+    newSets[index][name] = Number(value);
     setSets(newSets);
   };
 
-  // Add a new set row
   const addSet = () => {
     setSets([
       ...sets,
@@ -33,18 +56,14 @@ function WorkoutForm({ onNewWorkout }) {
     ]);
   };
 
-  // Remove a set row
   const removeSet = (index) => {
     const newSets = sets.filter((_, i) => i !== index);
-    // Re-index setNumbers after removal
     setSets(newSets.map((set, i) => ({ ...set, setNumber: i + 1 })));
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault();
 
-    // Basic validation
     if (!exerciseName.trim()) {
       setMessage("Exercise name cannot be empty.");
       return;
@@ -55,38 +74,56 @@ function WorkoutForm({ onNewWorkout }) {
     }
 
     try {
-      const newWorkout = {
+      const workoutData = {
         exerciseName,
-        date: new Date(), // Use current date for the record
+        date: editingWorkout ? editingWorkout.date : new Date(), // Keep original date if editing, otherwise use new date
         sets,
       };
 
-      // Send POST request to backend API
-      const response = await axios.post("/api/workouts", newWorkout);
-      setMessage("Workout added successfully!");
-      console.log("New workout added:", response.data);
-
-      // Clear the form
-      setExerciseName("");
-      setSets([{ setNumber: 1, repetitions: "", weight: "" }]);
-
-      // Notify parent component that a new workout was added
-      if (onNewWorkout) {
-        onNewWorkout();
+      let response;
+      if (editingWorkout) {
+        // --- Start: Update logic for editing ---
+        response = await axios.put(
+          `/api/workouts/${editingWorkout._id}`,
+          workoutData
+        );
+        setMessage("Workout updated successfully!");
+        console.log("Workout updated:", response.data);
+        if (onWorkoutUpdated) {
+          onWorkoutUpdated(); // Notify parent of update
+        }
+        // --- End: Update logic for editing ---
+      } else {
+        // --- Start: Create logic for new workout ---
+        response = await axios.post("/api/workouts", workoutData);
+        setMessage("Workout added successfully!");
+        console.log("New workout added:", response.data);
+        if (onNewWorkout) {
+          onNewWorkout(); // Notify parent of new workout
+        }
+        // --- End: Create logic for new workout ---
       }
+
+      // Form clear/reset is handled by useEffect when editingWorkout becomes null
     } catch (error) {
       setMessage(
-        `Error adding workout: ${error.response?.data?.msg || error.message}`
+        `Error ${editingWorkout ? "updating" : "adding"} workout: ${
+          error.response?.data?.msg || error.message
+        }`
       );
-      console.error("Error adding workout:", error);
+      console.error(
+        `Error ${editingWorkout ? "updating" : "adding"} workout:`,
+        error
+      );
     } finally {
-      setTimeout(() => setMessage(""), 3000); // Clear message after 3 seconds
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
   return (
     <div className="workout-form-container">
-      <h2>Add New Workout</h2>
+      <h2>{editingWorkout ? "Edit Workout Record" : "Add New Workout"}</h2>{" "}
+      {/* Dynamic title */}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="exerciseName">Exercise Name:</label>
@@ -120,7 +157,7 @@ function WorkoutForm({ onNewWorkout }) {
               onChange={(e) => handleSetChange(index, e)}
               placeholder="Weight (kg)"
               min="0"
-              step="0.5" // Allow decimal for weight
+              step="0.5"
               required
             />
             {sets.length > 1 && (
@@ -148,9 +185,21 @@ function WorkoutForm({ onNewWorkout }) {
           </p>
         )}
 
+        {/* --- Start: Dynamic buttons for Add/Update/Cancel --- */}
         <button type="submit" className="submit-workout-btn">
-          Add Workout
+          {editingWorkout ? "Update Workout" : "Add Workout"}{" "}
+          {/* Dynamic button text */}
         </button>
+        {editingWorkout && ( // Show Cancel button only when editing
+          <button
+            type="button"
+            onClick={onCancelEdit}
+            className="cancel-edit-btn"
+          >
+            Cancel Edit
+          </button>
+        )}
+        {/* --- End: Dynamic buttons for Add/Update/Cancel --- */}
       </form>
     </div>
   );
