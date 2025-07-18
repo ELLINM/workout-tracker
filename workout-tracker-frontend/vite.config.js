@@ -11,7 +11,6 @@ export default defineConfig({
         changeOrigin: true,
         // Remove the rewrite rule, or explicitly return the original path.
         // This ensures '/api/workouts' is sent as '/api/workouts' to the backend.
-        rewrite: (path) => path,
         configure: (proxy, options) => {
           proxy.on("proxyReq", (proxyReq, req, res) => {
             console.log(

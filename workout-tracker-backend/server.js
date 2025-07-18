@@ -1,36 +1,36 @@
-// server.js (Updated)
+// workout-tracker-backend/server.js
 
-require("dotenv").config();
+require("dotenv").config(); // Load environment variables from .env file
+
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors");
+const workoutRoutes = require("./routes/workouts");
+const userRoutes = require("./routes/user"); // Import user routes
 
+// express app
 const app = express();
-const port = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// middleware
+app.use(express.json()); // Parses incoming JSON requests
 
-// MongoDB Connection
+app.use((req, res, next) => {
+  console.log(req.path, req.method);
+  next();
+});
+
+// routes
+app.use("/api/workouts", workoutRoutes);
+app.use("/api/user", userRoutes); // Add user routes
+
+// connect to db
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected successfully!"))
-  .catch((err) => console.error("MongoDB connection error:", err));
-
-// Define routes
-// Import the workout routes
-const workoutRoutes = require("./routes/workouts");
-
-// Use the workout routes for /api/workouts path
-app.use("/api/workouts", workoutRoutes);
-
-// Basic route for testing
-app.get("/", (req, res) => {
-  res.send("Workout Tracker Backend API is running!");
-});
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+  .then(() => {
+    // listen for requests
+    app.listen(process.env.PORT, () => {
+      console.log("connected to db & listening on port", process.env.PORT);
+    });
+  })
+  .catch((error) => {
+    console.log(error);
+  });

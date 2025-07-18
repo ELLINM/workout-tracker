@@ -1,4 +1,4 @@
-// models/Workout.js
+// models/workout.js
 
 const mongoose = require("mongoose");
 
@@ -29,11 +29,11 @@ const WorkoutSchema = new mongoose.Schema(
   {
     // It's good practice to include a userId for future authentication/user management
     // For now, we can omit it if not implementing user auth immediately, but keep in mind for scalability.
-    // userId: {
-    //     type: mongoose.Schema.Types.ObjectId, // If linking to a separate User collection
-    //     ref: 'User',
-    //     required: true
-    // },
+    // user_id field added here for linking workouts to specific users
+    user_id: {
+      type: String, // Store as String, as _id from Mongoose is String representation of ObjectId
+      required: true,
+    },
     date: {
       type: Date,
       required: true,

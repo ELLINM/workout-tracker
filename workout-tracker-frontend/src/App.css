@@ -269,3 +269,139 @@ h2 {
 .cancel-edit-btn:hover {
   background-color: #5a6268;
 }
+
+form.login,
+form.signup {
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+form.login h3,
+form.signup h3 {
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+form.login label,
+form.signup label {
+  display: block;
+  margin: 20px 0 10px;
+  color: #555;
+  font-weight: bold;
+}
+
+form.login input,
+form.signup input {
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box; /* Include padding in width */
+}
+
+form.login button,
+form.signup button {
+  background: #1abc9c; /* Green color */
+  color: white;
+  border: 0;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  margin-top: 20px;
+  width: 100%;
+}
+
+form.login button:disabled,
+form.signup button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.error {
+  padding: 10px;
+  background: #ffefef;
+  border: 1px solid #ff0000;
+  color: #ff0000;
+  border-radius: 4px;
+  margin: 10px 0;
+  text-align: center;
+}
+
+/* Navbar styles */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #f8f8f8;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+
+nav h1 {
+  margin: 0;
+  color: #333;
+}
+
+nav a {
+  margin-left: 15px;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  transition: color 0.2s ease;
+}
+
+nav a:hover {
+  color: #1abc9c;
+}
+
+nav div {
+  display: flex;
+  align-items: center;
+}
+
+nav span {
+  margin-right: 15px;
+  font-weight: bold;
+  color: #555;
+}
+
+nav button {
+  background: #dc3545; /* Red for logout */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-left: 10px;
+  transition: background-color 0.2s ease;
+}
+
+nav button:hover {
+  background-color: #c82333;
+}
+
+/* Page container for routing */
+.pages {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.password-requirements {
+  margin-top: 5px;
+  margin-bottom: 15px;
+  color: #777;
+  font-size: 0.9em;
+}
+
+.password-requirements small {
+  display: block;
+}
