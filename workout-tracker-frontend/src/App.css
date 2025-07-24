@@ -405,3 +405,220 @@ nav button:hover {
 .password-requirements small {
   display: block;
 }
+
+.error {
+  padding: 10px;
+  background: #ffeded;
+  border: 1px solid #ff0000;
+  color: #ff0000;
+  border-radius: 4px;
+  margin: 10px 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Success message styling */
+.success {
+  padding: 10px;
+  background: #edfff0;
+  border: 1px solid #00aa00;
+  color: #00aa00;
+  border-radius: 4px;
+  margin: 10px 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* For disabled buttons during loading */
+button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+/* General label styling */
+label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: bold;
+}
+
+/* General input field styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"] {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box; /* Ensures padding doesn't increase total width/height */
+  width: 100%; /* Make inputs take full width of their container */
+  margin-bottom: 10px; /* Spacing between inputs */
+  font-size: 1em;
+}
+
+/* Error class for input fields (if not already there) */
+input.error {
+  border: 1px solid red;
+}
+
+.password-requirements {
+  margin-top: 5px;
+  margin-bottom: 15px;
+  color: #555; /* Slightly darker than #777 for better readability */
+  font-size: 0.9em;
+}
+
+.password-requirements ul {
+  list-style-type: disc; /* Or none if you prefer no bullet points */
+  margin-left: 20px;
+  padding: 0;
+}
+
+.password-requirements li {
+  margin-bottom: 3px;
+}
+
+/* Workout Details styling - Make sure workout-details has position: relative */
+.workout-item.workout-details {
+  background: #fff;
+  border-radius: 4px;
+  margin: 20px auto;
+  padding: 20px;
+  position: relative; /* Crucial for absolute positioning of icons */
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.workout-details span.material-symbols-outlined {
+  position: absolute;
+  top: 20px;
+  cursor: pointer;
+  background: #f1f1f1;
+  padding: 6px;
+  border-radius: 50%;
+  color: #333;
+}
+
+.workout-details span.material-symbols-outlined.delete-icon {
+  right: 20px; /* Keep delete icon position */
+  color: #d32f2f; /* Make delete icon red */
+}
+
+.workout-details span.material-symbols-outlined.edit-icon {
+  right: 60px; /* Position edit icon next to delete icon */
+  color: #1976d2; /* A distinct color for edit (blue) */
+}
+
+.workout-details span.material-symbols-outlined:hover {
+  background: #e0e0e0;
+}
+
+/* Add some margin/padding for lists in workout details */
+.workout-details ul {
+  list-style: none; /* Remove default bullet points */
+  padding: 0;
+  margin-top: 5px;
+}
+
+.workout-details li {
+  margin-bottom: 3px;
+}
+
+/* Workout Details styling - Make sure workout-item has position: relative */
+.workout-item {
+  /* Changed from .workout-item.workout-details to just .workout-item for simplicity based on provided HTML */
+  background: #fff;
+  border-radius: 4px;
+  margin: 20px auto;
+  padding: 20px;
+  position: relative; /* Crucial for absolute positioning of icons */
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+
+  width: calc(100% - 40px);
+  max-width: 600px;
+  box-sizing: border-box;
+  padding-right: 100px;
+}
+
+.workout-item h3 {
+  /* Style for workout item title */
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.workout-item p {
+  /* General paragraph styling in workout item */
+  margin: 0;
+  padding: 0;
+  font-size: 0.9em;
+  color: #777;
+  line-height: 1.6;
+}
+
+.workout-item strong {
+  color: #333;
+}
+
+/* Icons styling for workout items */
+.workout-item span.material-symbols-outlined {
+  position: absolute;
+  top: 20px; /* Adjust as needed */
+  cursor: pointer;
+  background: #f1f1f1;
+  padding: 6px;
+  border-radius: 50%;
+  color: #333;
+  font-size: 1.2em; /* Adjust icon size */
+  transition: background 0.2s ease-in-out;
+}
+
+.workout-item span.material-symbols-outlined.delete-icon {
+  right: 20px;
+  color: #d32f2f; /* Red for delete */
+}
+
+.workout-item span.material-symbols-outlined.edit-icon {
+  right: 100px; /* Position edit icon next to delete icon */
+  color: #1976d2; /* Blue for edit */
+}
+
+.workout-item span.material-symbols-outlined:hover {
+  background: #e0e0e0;
+}
+
+/* Set details list styling */
+.workout-item .sets-container {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-top: 1px dashed #eee;
+  padding-top: 10px;
+}
+
+.workout-item .sets-container h4 {
+  /* Style for "Set Details:" */
+  margin: 0 0 5px 0;
+  font-size: 1em;
+  color: #444;
+}
+
+.workout-item .sets-container ul {
+  list-style: none; /* Remove default bullet points */
+  padding: 0;
+  margin: 0;
+}
+
+.workout-item .sets-container li {
+  margin-bottom: 3px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.workout-item .time-ago {
+  /* Styling for 'time ago' text */
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-size: 0.8em;
+  color: #aaa;
+}

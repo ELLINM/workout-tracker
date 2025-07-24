@@ -9,27 +9,40 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
 
     try {
       const response = await axios.post("/api/user/signup", {
         email,
         password,
       });
+
+      // --- 인위적인 지연 시간 추가 (개발/테스트용) ---
+      // This part should be removed in production
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // --------------------------------------------------
+
       const json = response.data;
 
       setIsLoading(false);
+      setSuccessMessage("Signup successful! Redirecting to login...");
+      setTimeout(() => {
+        navigate("/login");
+      }, 500);
       console.log("User signed up:", json);
-      navigate("/login"); // Redirect to login page
     } catch (err) {
       setIsLoading(false);
-      setError(err.response?.data?.error || "Signup failed.");
-      console.error("Signup error:", err.response?.data?.error || err.message);
+      const errorMessage = err.response?.data?.error || "Signup failed.";
+      setError(errorMessage);
+      console.error("Signup error:", errorMessage);
+      setTimeout(() => setError(null), 5000);
     }
   };
 
@@ -51,13 +64,32 @@ const Signup = () => {
         value={password}
         required
       />
-      {/* Password requirements added here */}
+      {/* Updated Password Requirements */}
       <div className="password-requirements">
-        <small>Password must be at least 6 characters long.</small>
+        <small>Password must be:</small>
+        <ul>
+          <li>
+            <small>At least 8 characters long</small>
+          </li>
+          <li>
+            <small>Include at least one uppercase letter (A-Z)</small>
+          </li>
+          <li>
+            <small>Include at least one lowercase letter (a-z)</small>
+          </li>
+          <li>
+            <small>Include at least one number (0-9)</small>
+          </li>
+          {/* Optional: if you uncommented the special char validation in backend */}
+          {/* <li><small>Include at least one special character (!@#$%^&*)</small></li> */}
+        </ul>
       </div>
 
-      <button disabled={isLoading}>Sign Up</button>
+      <button disabled={isLoading}>
+        {isLoading ? "Signing up..." : "Sign Up"}
+      </button>
       {error && <div className="error">{error}</div>}
+      {successMessage && <div className="success">{successMessage}</div>}
     </form>
   );
 };

@@ -1,208 +1,226 @@
 // src/WorkoutForm.jsx
 
-import React, { useState, useEffect } from "react"; // Add useEffect
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-// Add editingWorkout, onWorkoutUpdated, onCancelEdit to props
-function WorkoutForm({
+const WorkoutForm = ({
   onNewWorkout,
   editingWorkout,
   onWorkoutUpdated,
   onCancelEdit,
-}) {
+}) => {
   const [exerciseName, setExerciseName] = useState("");
   const [sets, setSets] = useState([
     { setNumber: 1, repetitions: "", weight: "" },
   ]);
-  const [message, setMessage] = useState("");
+  const [date, setDate] = useState("");
+  const [error, setError] = useState(null);
+  const [emptyFields, setEmptyFields] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
 
-  // --- Start: useEffect to populate form when editingWorkout changes ---
   useEffect(() => {
     if (editingWorkout) {
       setExerciseName(editingWorkout.exerciseName);
-      // Ensure sets are correctly formatted for state
       setSets(
         editingWorkout.sets.map((set) => ({
-          setNumber: set.setNumber,
-          repetitions: set.repetitions,
-          weight: set.weight,
+          ...set,
+          repetitions: String(set.repetitions),
+          weight: String(set.weight),
         }))
       );
-      setMessage(""); // Clear any previous messages
+      setDate(new Date(editingWorkout.date).toISOString().split("T")[0]);
     } else {
-      // Reset form when not editing
       setExerciseName("");
       setSets([{ setNumber: 1, repetitions: "", weight: "" }]);
-      setMessage("");
+      setDate("");
+      setError(null);
+      setEmptyFields([]);
+      setSuccessMessage(null);
     }
-  }, [editingWorkout]); // Re-run effect when editingWorkout changes
-  // --- End: useEffect to populate form when editingWorkout changes ---
+  }, [editingWorkout]);
 
-  const handleExerciseNameChange = (e) => {
-    setExerciseName(e.target.value);
-  };
-
-  const handleSetChange = (index, e) => {
-    const { name, value } = e.target;
+  const handleSetChange = (index, field, value) => {
     const newSets = [...sets];
-    newSets[index][name] = Number(value);
+    newSets[index][field] = value;
     setSets(newSets);
   };
 
-  const addSet = () => {
+  const handleAddSet = () => {
     setSets([
       ...sets,
       { setNumber: sets.length + 1, repetitions: "", weight: "" },
     ]);
   };
 
-  const removeSet = (index) => {
-    const newSets = sets.filter((_, i) => i !== index);
-    setSets(newSets.map((set, i) => ({ ...set, setNumber: i + 1 })));
+  const handleRemoveSet = (index) => {
+    if (sets.length > 1) {
+      const newSets = sets
+        .filter((_, i) => i !== index)
+        .map((set, i) => ({ ...set, setNumber: i + 1 }));
+      setSets(newSets);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setEmptyFields([]);
+    setSuccessMessage(null);
 
-    if (!exerciseName.trim()) {
-      setMessage("Exercise name cannot be empty.");
-      return;
-    }
-    if (sets.some((set) => set.repetitions === "" || set.weight === "")) {
-      setMessage("All repetitions and weights must be filled for each set.");
-      return;
+    const workoutData = {
+      exerciseName,
+      sets: sets.map((set) => ({
+        ...set,
+        repetitions: Number(set.repetitions),
+        weight: Number(set.weight),
+      })),
+      date,
+    };
+
+    let url = "/api/workouts";
+    let method = "post";
+
+    if (editingWorkout) {
+      url = `/api/workouts/${editingWorkout._id}`;
+      method = "patch";
     }
 
     try {
-      const workoutData = {
-        exerciseName,
-        date: editingWorkout ? editingWorkout.date : new Date(), // Keep original date if editing, otherwise use new date
-        sets,
-      };
-
       let response;
-      if (editingWorkout) {
-        // --- Start: Update logic for editing ---
-        response = await axios.put(
-          `/api/workouts/${editingWorkout._id}`,
-          workoutData
-        );
-        setMessage("Workout updated successfully!");
-        console.log("Workout updated:", response.data);
-        if (onWorkoutUpdated) {
-          onWorkoutUpdated(); // Notify parent of update
-        }
-        // --- End: Update logic for editing ---
+      if (method === "post") {
+        response = await axios.post(url, workoutData);
       } else {
-        // --- Start: Create logic for new workout ---
-        response = await axios.post("/api/workouts", workoutData);
-        setMessage("Workout added successfully!");
-        console.log("New workout added:", response.data);
-        if (onNewWorkout) {
-          onNewWorkout(); // Notify parent of new workout
-        }
-        // --- End: Create logic for new workout ---
+        // patch
+        response = await axios.patch(url, workoutData);
       }
 
-      // Form clear/reset is handled by useEffect when editingWorkout becomes null
-    } catch (error) {
-      setMessage(
-        `Error ${editingWorkout ? "updating" : "adding"} workout: ${
-          error.response?.data?.msg || error.message
-        }`
-      );
-      console.error(
-        `Error ${editingWorkout ? "updating" : "adding"} workout:`,
-        error
-      );
-    } finally {
-      setTimeout(() => setMessage(""), 3000);
+      // --- 인위적인 지연 시간 추가 (개발/테스트용) ---
+      await new Promise((resolve) => setTimeout(resolve, 1500)); // 1.5초 지연
+      // --------------------------------------------------
+
+      setIsLoading(false);
+      setExerciseName("");
+      setSets([{ setNumber: 1, repetitions: "", weight: "" }]);
+      setDate("");
+      setEmptyFields([]);
+
+      if (editingWorkout) {
+        onWorkoutUpdated();
+        setSuccessMessage("Workout updated successfully!");
+      } else {
+        onNewWorkout();
+        setSuccessMessage("Workout added successfully!");
+      }
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setIsLoading(false);
+      const errorData = err.response?.data;
+      if (errorData?.emptyFields) {
+        setError(errorData.error);
+        setEmptyFields(errorData.emptyFields);
+      } else {
+        setError(
+          errorData?.error ||
+            (editingWorkout
+              ? "Failed to update workout."
+              : "Failed to add workout.")
+        );
+      }
+      setTimeout(() => setError(null), 5000);
     }
   };
 
   return (
-    <div className="workout-form-container">
-      <h2>{editingWorkout ? "Edit Workout Record" : "Add New Workout"}</h2>{" "}
-      {/* Dynamic title */}
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="exerciseName">Exercise Name:</label>
+    <form className="create" onSubmit={handleSubmit}>
+      <h3>{editingWorkout ? "Edit Workout Record" : "Add a New Workout"}</h3>
+
+      <label>Exercise Name:</label>
+      <input
+        type="text"
+        onChange={(e) => setExerciseName(e.target.value)}
+        value={exerciseName}
+        className={emptyFields.includes("exerciseName") ? "error" : ""}
+        required
+      />
+
+      <label>Date:</label>
+      <input
+        type="date"
+        onChange={(e) => setDate(e.target.value)}
+        value={date}
+        className={emptyFields.includes("date") ? "error" : ""}
+        required
+      />
+
+      <h4>Sets:</h4>
+      {sets.map((set, index) => (
+        <div key={index} className="set-input-group">
+          <span>Set {set.setNumber}:</span>
           <input
-            type="text"
-            id="exerciseName"
-            value={exerciseName}
-            onChange={handleExerciseNameChange}
-            placeholder="e.g., Bench Press, Squat"
+            type="number"
+            placeholder="Reps"
+            value={set.repetitions}
+            onChange={(e) =>
+              handleSetChange(index, "repetitions", e.target.value)
+            }
+            className={
+              emptyFields.includes("sets") && !set.repetitions ? "error" : ""
+            }
             required
+            min="1"
           />
+          <input
+            type="number"
+            placeholder="Weight (kg)"
+            value={set.weight}
+            onChange={(e) => handleSetChange(index, "weight", e.target.value)}
+            className={
+              emptyFields.includes("sets") && !set.weight ? "error" : ""
+            }
+            required
+            min="0"
+          />
+          {sets.length > 1 && (
+            <button
+              type="button"
+              onClick={() => handleRemoveSet(index)}
+              className="remove-set-btn"
+            >
+              Remove Set
+            </button>
+          )}
         </div>
+      ))}
+      <button type="button" onClick={handleAddSet} className="add-set-btn">
+        Add Another Set
+      </button>
 
-        <h3>Sets:</h3>
-        {sets.map((set, index) => (
-          <div key={index} className="set-input-group">
-            <label>Set {set.setNumber}:</label>
-            <input
-              type="number"
-              name="repetitions"
-              value={set.repetitions}
-              onChange={(e) => handleSetChange(index, e)}
-              placeholder="Reps"
-              min="1"
-              required
-            />
-            <input
-              type="number"
-              name="weight"
-              value={set.weight}
-              onChange={(e) => handleSetChange(index, e)}
-              placeholder="Weight (kg)"
-              min="0"
-              step="0.5"
-              required
-            />
-            {sets.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeSet(index)}
-                className="remove-set-btn"
-              >
-                Remove Set
-              </button>
-            )}
-          </div>
-        ))}
-        <button type="button" onClick={addSet} className="add-set-btn">
-          Add Another Set
+      <button disabled={isLoading}>
+        {isLoading
+          ? editingWorkout
+            ? "Updating..."
+            : "Adding..."
+          : editingWorkout
+          ? "Update Workout"
+          : "Add Workout"}
+      </button>
+      {editingWorkout && (
+        <button
+          type="button"
+          onClick={onCancelEdit}
+          className="cancel-edit-btn"
+          disabled={isLoading}
+        >
+          Cancel Edit
         </button>
+      )}
 
-        {message && (
-          <p
-            className={`form-message ${
-              message.startsWith("Error") ? "error" : "success"
-            }`}
-          >
-            {message}
-          </p>
-        )}
-
-        {/* --- Start: Dynamic buttons for Add/Update/Cancel --- */}
-        <button type="submit" className="submit-workout-btn">
-          {editingWorkout ? "Update Workout" : "Add Workout"}{" "}
-          {/* Dynamic button text */}
-        </button>
-        {editingWorkout && ( // Show Cancel button only when editing
-          <button
-            type="button"
-            onClick={onCancelEdit}
-            className="cancel-edit-btn"
-          >
-            Cancel Edit
-          </button>
-        )}
-        {/* --- End: Dynamic buttons for Add/Update/Cancel --- */}
-      </form>
-    </div>
+      {error && <div className="error">{error}</div>}
+      {successMessage && <div className="success">{successMessage}</div>}
+    </form>
   );
-}
+};
 
 export default WorkoutForm;

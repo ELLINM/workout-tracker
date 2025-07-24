@@ -11,24 +11,27 @@ import { useAuthContext } from "./hooks/useAuthContext";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
+// date-fns for formatting dates
+import { formatDistanceToNow } from "date-fns";
+import { ko } from "date-fns/locale"; // Import Korean locale for date-fns
+
 import "./App.css";
 
-// Home component (unchanged - as provided in previous steps)
+// Home component (MODIFIED to correctly handle props and render edit button/date/sets)
 const Home = ({
   workouts,
   loading,
   error,
   editingWorkout,
-  setEditingWorkout,
   selectedExerciseForChart,
   setSelectedExerciseForChart,
   selectedChartType,
   setSelectedChartType,
-  handleNewWorkoutAdded,
+  handleNewWorkoutAdded, // Renamed from handleWorkoutChange for clarity
   handleDeleteWorkout,
-  handleEditClick,
-  handleWorkoutUpdated,
-  handleCancelEdit,
+  handleEditClick, // Passed from App component
+  handleWorkoutUpdated, // Passed from App component
+  handleCancelEdit, // Passed from App component
   uniqueExerciseNames,
   handleChartTypeChange,
 }) => {
@@ -128,27 +131,45 @@ const Home = ({
           )}
           <hr className="divider" />
 
+          {/* Workout List Rendering - MODIFIED */}
           <div className="workout-list">
             {workouts.map((workout) => (
-              <div key={workout._id} className="workout-item">
-                <h3>{workout.exerciseName}</h3>
+              <div key={workout._id} className="workout-item workout-details">
+                {" "}
+                {/* Added workout-details class for consistent styling */}
+                <h4>{workout.exerciseName}</h4>
                 <p>
-                  Date:{" "}
-                  {new Date(workout.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  <strong>Date: </strong>
+                  {new Date(workout.date).toLocaleDateString("ko-KR")}{" "}
+                  {/* Use ko-KR for date */}
                 </p>
                 <div className="sets-container">
-                  <h4>Set Details:</h4>
-                  {workout.sets.map((set, index) => (
-                    <p key={index} className="set-item">
-                      Set {set.setNumber}: {set.repetitions} reps @ {set.weight}{" "}
-                      kg
-                    </p>
-                  ))}
+                  <strong>Set Details:</strong>
+                  <ul>
+                    {" "}
+                    {/* Changed to unordered list for sets */}
+                    {workout.sets.map((set, index) => (
+                      <li key={index} className="set-item">
+                        Set {set.setNumber}: {set.repetitions} reps @{" "}
+                        {set.weight} kg
+                      </li>
+                    ))}
+                  </ul>
                 </div>
+                {/* Action Buttons - MODIFIED to use material icons */}
+                <span
+                  className="material-symbols-outlined delete-icon"
+                  onClick={() => handleDeleteWorkout(workout._id)}
+                >
+                  delete
+                </span>
+                <span
+                  className="material-symbols-outlined edit-icon"
+                  onClick={() => handleEditClick(workout)}
+                >
+                  edit
+                </span>
+                {/* Original buttons were here:
                 <button
                   onClick={() => handleEditClick(workout)}
                   className="edit-btn"
@@ -161,6 +182,15 @@ const Home = ({
                 >
                   Delete
                 </button>
+                */}
+                <p className="time-ago">
+                  {" "}
+                  {/* Added class for time ago styling */}
+                  {formatDistanceToNow(new Date(workout.createdAt), {
+                    addSuffix: true,
+                    locale: ko,
+                  })}
+                </p>
               </div>
             ))}
           </div>
@@ -174,7 +204,7 @@ function App() {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [editingWorkout, setEditingWorkout] = useState(null); // State to hold the workout being edited
   const [selectedExerciseForChart, setSelectedExerciseForChart] = useState("");
   const [selectedChartType, setSelectedChartType] = useState("weight");
 
@@ -199,16 +229,28 @@ function App() {
     return () => {
       axios.interceptors.request.eject(requestInterceptor);
     };
-  }, [user]); // Re-run effect when user object changes
+  }, [user]);
 
   const fetchWorkouts = useCallback(async () => {
+    setLoading(true); // Start loading before fetch
+    setError(null); // Clear previous errors
+
+    if (!user) {
+      setWorkouts([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.get("/api/workouts");
+      // --- 인위적인 지연 시간 추가 (개발/테스트용) ---
+      // This part should be removed in production
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1초 지연
+      // --------------------------------------------------
       setWorkouts(response.data);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching workout records:", err);
-      // Handle 401 Unauthorized errors (e.g., token expired)
       if (err.response && err.response.status === 401) {
         authDispatch({ type: "LOGOUT" });
         localStorage.removeItem("user");
@@ -219,22 +261,20 @@ function App() {
       }
       setLoading(false);
     }
-  }, [authDispatch, navigate]); // Add authDispatch and navigate to dependencies
+  }, [authDispatch, navigate, user]);
 
   useEffect(() => {
     if (user) {
       fetchWorkouts();
     } else {
-      // If user logs out or is not logged in, clear workouts and stop loading
       setWorkouts([]);
       setLoading(false);
     }
   }, [fetchWorkouts, user]);
 
   const handleNewWorkoutAdded = () => {
-    setLoading(true);
-    fetchWorkouts();
-    setEditingWorkout(null);
+    setEditingWorkout(null); // Clear editing state when new workout is added
+    fetchWorkouts(); // Re-fetch all workouts
   };
 
   const handleDeleteWorkout = async (id) => {
@@ -243,9 +283,11 @@ function App() {
     ) {
       try {
         await axios.delete(`/api/workouts/${id}`);
-        setWorkouts(workouts.filter((workout) => workout._id !== id));
+        // No need to filter workouts here, fetchWorkouts will refresh
+        // setWorkouts(workouts.filter((workout) => workout._id !== id));
         console.log(`Workout with ID ${id} deleted successfully.`);
-        setEditingWorkout(null);
+        setEditingWorkout(null); // Clear editing state if deleted workout was being edited
+        fetchWorkouts(); // Re-fetch to update the list and clear cache
       } catch (err) {
         console.error(`Error deleting workout with ID ${id}:`, err);
         if (err.response && err.response.status === 401) {
@@ -262,12 +304,12 @@ function App() {
 
   const handleEditClick = (workout) => {
     setEditingWorkout(workout);
+    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to top for form
   };
 
   const handleWorkoutUpdated = () => {
     setEditingWorkout(null);
-    setLoading(true);
-    fetchWorkouts();
+    fetchWorkouts(); // Re-fetch to update the list
   };
 
   const handleCancelEdit = () => {
@@ -319,7 +361,7 @@ function App() {
                   loading={loading}
                   error={error}
                   editingWorkout={editingWorkout}
-                  setEditingWorkout={setEditingWorkout}
+                  setEditingWorkout={setEditingWorkout} // Not used directly in Home, but passed for consistency
                   selectedExerciseForChart={selectedExerciseForChart}
                   setSelectedExerciseForChart={setSelectedExerciseForChart}
                   selectedChartType={selectedChartType}
